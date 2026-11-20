@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P6 Science Fact Sprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: polka-dot page, lilac and indigo with mint and magenta (P6). Topic chips on top, three mode tabs, one big working card below. */
+:root{
+  --paper:#f3effa;
+  --grid:#ddd2f0;
+  --ink:#2a1f5c;
+  --muted:#635a85;
+  --card:#ffffff;
+  --line:#d9cfec;
+  --accent:#7fe0c4;       /* mint highlighter */
+  --accent-ink:#06352a;
+  --blue:#b0306f;
+  --good:#1f8a55;
+  --good-bg:#e0f3e7;
+  --bad:#c2384f;
+  --bad-bg:#fbe5e9;
+  --display:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#17122e; --grid:#272048; --ink:#ece8fb; --muted:#aaa2cc; --card:#211a40; --line:#3a3163;
+    --accent:#7fe0c4; --accent-ink:#06352a; --blue:#ff8cc3; --good:#5ad48f; --good-bg:#123326; --bad:#ff8a9c; --bad-bg:#3d1822;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#17122e; --grid:#272048; --ink:#ece8fb; --muted:#aaa2cc; --card:#211a40; --line:#3a3163;
+    --accent:#7fe0c4; --accent-ink:#06352a; --blue:#ff8cc3; --good:#5ad48f; --good-bg:#123326; --bad:#ff8a9c; --bad-bg:#3d1822;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background-color:var(--paper);
+  background-image:radial-gradient(var(--grid) 2px, transparent 2.5px),radial-gradient(var(--grid) 2px, transparent 2.5px);
+  background-size:26px 26px; background-position:0 0, 13px 13px;
+  color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.5;
+}
+.wrap{max-width:900px; margin:0 auto; padding:24px 16px 48px; display:flex; flex-direction:column; gap:18px}
+header{display:flex; flex-direction:column; gap:4px}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(28px,5vw,40px); margin:0; line-height:1.1; text-wrap:balance}
+h1 mark{background:linear-gradient(transparent 55%, var(--accent) 55%); color:inherit; padding:0 4px}
+.sub{color:var(--muted); margin:0; font-size:16px}
+h2{font-family:var(--display); font-weight:600; font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:14px; padding:16px}
+.topics{display:flex; flex-direction:column; gap:10px}
+.topic-head{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{font:inherit; font-size:15px; border:2px solid var(--line); background:transparent; color:var(--ink); border-radius:999px; padding:6px 12px; cursor:pointer; display:inline-flex; gap:6px; align-items:center}
+.chip .theme{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.chip[aria-pressed="true"] .theme{color:var(--accent)}
+.linkbtn{font:inherit; font-size:14px; background:none; border:none; color:var(--blue); cursor:pointer; text-decoration:underline; padding:2px 4px}
+.tabs{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.tab{font-family:var(--display); font-weight:600; font-size:18px; border:2px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; padding:10px 8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:0}
+.tab small{font-family:var(--body); font-weight:400; font-size:13px; color:var(--muted)}
+.tab[aria-selected="true"]{border-color:var(--ink); background:var(--accent); color:var(--accent-ink); box-shadow:0 4px 0 var(--ink)}
+.tab[aria-selected="true"] small{color:var(--accent-ink)}
+button:focus-visible,.blank:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+.btn{font-family:var(--display); font-weight:600; font-size:17px; border:2px solid var(--ink); background:var(--card); color:var(--ink); border-radius:10px; padding:9px 16px; cursor:pointer}
+.btn.primary{background:var(--ink); color:var(--paper)}
+.btn.good{border-color:var(--good); color:var(--good)}
+.btn.bad{border-color:var(--bad); color:var(--bad)}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.row.between{justify-content:space-between}
+.meta{color:var(--muted); font-size:15px; font-variant-numeric:tabular-nums}
+.tag{display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--blue)}
+[hidden]{display:none !important}
+
+.pics{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start}
+.pics img{max-width:100%; max-height:230px; border-radius:10px; border:2px solid var(--line); background:#fff; object-fit:contain}
+.flash .pics img{max-height:250px}
+@media (max-width:480px){ .pics img{max-height:170px} }
+
+/* Flashcards */
+.flash{min-height:260px; border:2px solid var(--ink); border-radius:16px; background:var(--card); padding:24px; display:flex; flex-direction:column; justify-content:center; gap:14px; cursor:pointer; box-shadow:6px 6px 0 var(--line); text-align:left; width:100%; font:inherit; color:inherit}
+.flash .q{font-family:var(--display); font-weight:600; font-size:clamp(22px,3.6vw,30px); line-height:1.25; text-wrap:balance}
+.flash .a{font-size:20px; border-top:2px dashed var(--line); padding-top:14px}
+.flash .a strong{background:linear-gradient(transparent 55%, var(--accent) 55%)}
+.flash .hint{color:var(--muted); font-size:14px}
+.tally{display:flex; gap:14px}
+.tally span{font-variant-numeric:tabular-nums}
+
+/* Fill the gaps */
+.passage{font-size:21px; line-height:2.1}
+.blank{display:inline-block; min-width:110px; border:none; border-bottom:3px solid var(--ink); background:transparent; color:var(--ink); font:inherit; font-weight:700; padding:0 6px; margin:0 2px; cursor:pointer; text-align:center; line-height:1.4; border-radius:4px 4px 0 0}
+.blank.active{background:var(--accent); color:var(--accent-ink)}
+.blank.right{border-color:var(--good); background:var(--good-bg); color:var(--good)}
+.blank.wrong{border-color:var(--bad); background:var(--bad-bg); color:var(--bad)}
+.bank{display:flex; flex-wrap:wrap; gap:8px; padding:12px; border:2px dashed var(--line); border-radius:12px}
+.word{font:inherit; font-size:18px; font-weight:700; border:2px solid var(--blue); color:var(--blue); background:var(--card); border-radius:8px; padding:6px 12px; cursor:pointer}
+.word.used{opacity:.3; text-decoration:line-through}
+.result{font-family:var(--display); font-weight:600; font-size:18px}
+.result.good{color:var(--good)} .result.bad{color:var(--bad)}
+
+/* Sprint */
+.sprint-top{display:flex; gap:12px; flex-wrap:wrap}
+.stat{flex:1 1 120px; border:2px solid var(--line); border-radius:12px; padding:8px 12px; background:var(--card)}
+.stat b{display:block; font-family:var(--display); font-size:30px; line-height:1.1; font-variant-numeric:tabular-nums}
+.stat span{font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+.timerbar{height:10px; border-radius:999px; background:var(--grid); overflow:hidden}
+.timerbar i{display:block; height:100%; background:var(--ink); width:100%; transition:width 1s linear}
+.timerbar.low i{background:var(--bad)}
+.sq{font-family:var(--display); font-weight:600; font-size:clamp(22px,3.6vw,28px); line-height:1.25; margin:0; text-wrap:balance}
+.opts{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px}
+.opt{font:inherit; font-size:19px; font-weight:700; text-align:left; border:2px solid var(--ink); border-radius:12px; background:var(--card); color:var(--ink); padding:12px 14px; cursor:pointer; display:flex; gap:10px; align-items:center}
+.opt kbd{font-family:var(--display); font-size:14px; border:2px solid var(--line); border-radius:6px; padding:0 7px; color:var(--muted)}
+.opt.right{background:var(--good-bg); border-color:var(--good); color:var(--good)}
+.opt.wrong{background:var(--bad-bg); border-color:var(--bad); color:var(--bad)}
+.big{font-family:var(--display); font-weight:700; font-size:56px; line-height:1}
+.misses{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px}
+.misses li span{color:var(--good); font-weight:700}
+.stack{display:flex; flex-direction:column; gap:14px}
+.note{font-size:14px; color:var(--muted); margin:0}
+@media (max-width:480px){
+  body{font-size:17px}
+  .tab{font-size:16px}
+  .passage{font-size:19px}
+  .blank{min-width:90px}
+}
+@media (prefers-reduced-motion: reduce){ .timerbar i{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>P6 Science <mark>Fact Sprint</mark></h1>
+    <p class="sub">Quick revision of the key facts from the P6 Science revision cards. Choose your topics, then pick a mode.</p>
+  </header>
+
+  <section class="panel topics" aria-labelledby="topics-h">
+    <div class="topic-head">
+      <h2 id="topics-h">Topics</h2>
+      <div><button class="linkbtn" id="all">Select all</button><button class="linkbtn" id="none">Clear</button></div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Revision mode">
+    <button class="tab" role="tab" id="tab-cards" data-mode="cards">Flashcards<small>Learn the facts</small></button>
+    <button class="tab" role="tab" id="tab-gaps" data-mode="gaps">Fill the Gaps<small>Use the word bank</small></button>
+    <button class="tab" role="tab" id="tab-sprint" data-mode="sprint">60s Sprint<small>Fast and accurate</small></button>
+  </nav>
+
+  <!-- FLASHCARDS -->
+  <section class="panel stack" id="mode-cards" role="tabpanel" aria-labelledby="tab-cards">
+    <div class="row between">
+      <span class="meta" id="fc-count"></span>
+      <div class="tally meta"><span>Knew it: <b id="fc-know">0</b></span><span>Still learning: <b id="fc-learn">0</b></span></div>
+    </div>
+    <button class="flash" id="fc-card" aria-live="polite">
+      <span class="tag" id="fc-topic"></span>
+      <span class="q" id="fc-q"></span>
+      <span class="pics" id="fc-qpics" hidden></span>
+      <span class="a" id="fc-a" hidden></span>
+      <span class="pics" id="fc-apics" hidden></span>
+      <span class="hint" id="fc-hint">Say your answer out loud, then tap the card (or press Space) to check.</span>
+    </button>
+    <div class="row between">
+      <div class="row">
+        <button class="btn" id="fc-prev">← Back</button>
+        <button class="btn" id="fc-shuffle">Shuffle</button>
+      </div>
+      <div class="row">
+        <button class="btn bad" id="fc-no">Still learning</button>
+        <button class="btn good" id="fc-yes">Knew it ✓</button>
+      </div>
+    </div>
+    <div class="row">
+      <button class="linkbtn" id="fc-review" hidden>Review only my "still learning" cards</button>
+      <button class="linkbtn" id="fc-reset">Start the deck again</button>
+    </div>
+  </section>
+
+  <!-- FILL THE GAPS -->
+  <section class="panel stack" id="mode-gaps" role="tabpanel" aria-labelledby="tab-gaps" hidden>
+    <div class="row between">
+      <span class="tag" id="g-topic"></span>
+      <span class="meta" id="g-count"></span>
+    </div>
+    <h3 class="sq" id="g-title"></h3>
+    <div class="pics" id="g-pics" hidden></div>
+    <div class="bank" id="g-bank" aria-label="Word bank"></div>
+    <p class="passage" id="g-text"></p>
+    <p class="note">Tap a blank, then tap a word. Tap a filled blank to empty it.</p>
+    <div class="row between">
+      <div class="row">
+        <button class="btn primary" id="g-check">Check</button>
+        <button class="btn" id="g-show">Show answers</button>
+        <button class="btn" id="g-clear">Clear</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="g-prev">← Back</button>
+        <button class="btn" id="g-next">Next →</button>
+      </div>
+    </div>
+    <div class="result" id="g-result" aria-live="polite"></div>
+  </section>
+
+  <!-- SPRINT -->
+  <section class="panel stack" id="mode-sprint" role="tabpanel" aria-labelledby="tab-sprint" hidden>
+    <div id="sp-start" class="stack">
+      <h3 class="sq">How many facts can you get right in 60 seconds?</h3>
+      <p style="margin:0">Each correct answer scores 1 point. Every 5 correct in a row earns a bonus point. Wrong answers do not lose points, but they appear at the end so you know what to revise.</p>
+      <p class="note">On a keyboard, press 1–4 to answer.</p>
+      <div class="row"><button class="btn primary" id="sp-go">Start sprint</button><span class="meta" id="sp-best"></span></div>
+    </div>
+    <div id="sp-play" class="stack" hidden>
+      <div class="sprint-top">
+        <div class="stat"><span>Time</span><b id="sp-time">60</b></div>
+        <div class="stat"><span>Score</span><b id="sp-score">0</b></div>
+        <div class="stat"><span>Streak</span><b id="sp-streak">0</b></div>
+      </div>
+      <div class="timerbar" id="sp-bar"><i id="sp-fill"></i></div>
+      <span class="tag" id="sp-topic"></span>
+      <p class="sq" id="sp-q" aria-live="polite"></p>
+      <div class="pics" id="sp-pics" hidden></div>
+      <div class="opts" id="sp-opts"></div>
+    </div>
+    <div id="sp-end" class="stack" hidden>
+      <div class="row" style="gap:24px">
+        <div><div class="big" id="sp-final">0</div><div class="meta">points</div></div>
+        <div class="meta" id="sp-summary"></div>
+      </div>
+      <div id="sp-miss-wrap" class="stack">
+        <h2>Facts to revise</h2>
+        <ol class="misses" id="sp-misses"></ol>
+      </div>
+      <div class="row"><button class="btn primary" id="sp-again">Sprint again</button></div>
+    </div>
+  </section>
+
+  <p class="note">Content and pictures adapted from the P6 Science Revision Cards (Science teachers of Yangzheng Primary School).</p>
+</div>
+
+<script>
+const TOPICS = [
+  {id:"energy",  name:"Energy in food",          theme:"Energy"},
+  {id:"forces",  name:"Forces",                  theme:"Interactions"},
+  {id:"env",     name:"Environment & communities", theme:"Living together"},
+  {id:"food",    name:"Food chains",             theme:"Living together"},
+  {id:"adapt",   name:"Adaptations",             theme:"Living together"},
+  {id:"impact",  name:"Man's impact",            theme:"Living together"}
+];
+const TNAME = Object.fromEntries(TOPICS.map(t=>[t.id,t.name]));
+
+/* ---------- Flashcards: [topic, question, answer(HTML ok)] ---------- */
+const CARDS = [
+ ["energy","What does a plant need for photosynthesis, and what does it make?","<strong>Light, water</strong> and <strong>carbon dioxide</strong> are used to make <strong>sugar</strong> and <strong>oxygen</strong>."],
+ ["energy","What happens to the excess sugar made in photosynthesis?","It is <strong>stored as starch</strong>."],
+ ["energy","How do plants and people get energy from the Sun?","Plants get their food <strong>directly</strong> from the Sun. We get our food <strong>indirectly</strong> from the Sun, by eating plants or animals that ate plants."],
+ ["forces","What is a force?","A <strong>push</strong> or a <strong>pull</strong>. We <strong>push</strong> a trolley. We <strong>pull</strong> a rubber band to stretch it."],
+ ["forces","Name the 4 types of forces.","<strong>Gravity, elastic force, frictional force</strong> and <strong>magnetic force</strong>."],
+ ["forces","Can we see a force?","No. We cannot see a force, but we can see and feel its <strong>effects</strong>."],
+ ["forces","What are the effects of a force?","A force can make a <strong>stationary</strong> object start moving; make a <strong>moving</strong> object <strong>stop, change direction, slow down or speed up</strong>; and change an object's <strong>shape or size</strong>."],
+ ["env","Name the 6 factors in an environment that affect the survival of living things.","<strong>F-A-T-O-W-L</strong>: <strong>Food, Air (oxygen), Temperature, Organisms, Water, Light</strong>."],
+ ["env","What is a population?","A group of organisms of the <strong>same kind</strong> living together in the <strong>same place</strong> at the same time."],
+ ["env","How many populations of animals are in this picture?","<strong>2</strong> populations of animals (each kind of animal is one population)."],
+ ["env","What is a community?","<strong>Different populations</strong> of organisms living and interacting together in the same place."],
+ ["env","Which community do crabs and starfish belong to?","The <strong>seashore</strong> community."],
+ ["env","Which community do mudskippers, crocodiles and frogs belong to?","The <strong>mangrove swamp</strong> community."],
+ ["env","Which community do pondskaters, dragonflies and ducks belong to?","The <strong>pond</strong> community."],
+ ["env","Which community do grasshoppers, mimosa plants and snails belong to?","The <strong>field</strong> community."],
+ ["env","Which community do butterflies, bees and flowering plants belong to?","The <strong>garden</strong> community."],
+ ["env","Which community do bird's nest ferns and moss belong to?","The <strong>tree</strong> community."],
+ ["food","In the food chain grass → goat → tiger, name the producer, consumers, prey and predator.","Grass: <strong>producer</strong>. Goat: <strong>consumer</strong> and <strong>prey</strong>. Tiger: <strong>consumer</strong> and <strong>predator</strong>."],
+ ["food","What is a producer?","An organism that <strong>makes its own food</strong>, e.g. a green plant."],
+ ["food","What is a consumer?","An organism that <strong>cannot make its own food</strong> and eats other organisms."],
+ ["food","What is the difference between a predator and a prey?","A <strong>predator</strong> hunts and eats other animals. A <strong>prey</strong> is the animal that is hunted and eaten."],
+ ["food","Where does the energy in a food chain come from?","The <strong>Sun</strong>. Plants trap light energy to make food, and the energy passes along the chain."],
+ ["adapt","Why do animals adapt?","To <strong>get air, water and food</strong>; to <strong>cope with cold and warm conditions</strong>; to <strong>protect themselves from enemies</strong>; and to <strong>reproduce</strong>."],
+ ["adapt","What are the 2 types of adaptation?","<strong>Physical</strong>: body shapes, body colours, body coverings (e.g. stick insect). <strong>Behavioural</strong>: hide under rocks, stay in the shade, come out only at night to hunt (e.g. desert fox)."],
+ ["adapt","How are living things adapted to cold places?","<strong>Thick fur</strong> and a <strong>layer of fat</strong> (e.g. penguin, polar bear). Some plants have <strong>needle-like leaves</strong>."],
+ ["adapt","How are living things adapted to hot, dry places?","Animals <strong>urinate and sweat very little</strong> (e.g. camel). Plants have <strong>needle-like leaves</strong> and <strong>thick fleshy stems</strong> (e.g. cactus)."],
+ ["adapt","How are sharks, penguins and eagles adapted for movement?","Shark: <strong>streamlined body shape</strong>. Penguin: <strong>webbed feet</strong> and <strong>flippers</strong>. Eagle: <strong>hollow bones</strong> and <strong>strong wings</strong>."],
+ ["adapt","How are animals adapted for breathing underwater?","Goldfish: <strong>gills</strong>. Mosquito larva: <strong>air tube</strong>. Water beetle: <strong>air bubble</strong>. Frog: <strong>moist skin</strong>."],
+ ["adapt","How are animals adapted to living in the dark?","<strong>Very good night vision</strong> (e.g. owl) and <strong>body parts that light up</strong>."],
+ ["adapt","How are animals adapted for reproduction?","<strong>Fighting</strong> to win a mate, making <strong>mating calls</strong>, <strong>displaying</strong> certain body parts (e.g. peacock), and body parts that <strong>light up</strong> (e.g. glow worm)."],
+ ["adapt","How are animals adapted to protect themselves against predators?","<strong>Sharp or hard body coverings</strong> such as spines, scales and shells (e.g. hedgehog), and making themselves <strong>appear bigger</strong> (e.g. pufferfish)."],
+ ["adapt","How are animals adapted for catching prey?","<strong>Strong jaws and claws</strong> (e.g. tiger), <strong>traps or webs</strong>, and <strong>venom</strong> to kill prey (e.g. spider)."],
+ ["adapt","How are plants adapted to obtain sunlight?","<strong>Strong, woody stems</strong> hold branches and leaves upright. Plants with <strong>weak stems climb onto supports</strong> such as other plants."],
+ ["impact","Name 4 ways Man can harm the environment.","<strong>Pollution, deforestation, global warming</strong> and <strong>depletion of natural resources</strong>."],
+ ["impact","What is pollution?","Harmful substances called <strong>pollutants</strong> are released into the <strong>land, air and water</strong>."],
+ ["impact","What is deforestation?","Large areas of forest are <strong>cleared by burning or cutting down trees</strong> to make space for farming or housing."],
+ ["impact","What are the effects of global warming?","The Earth's <strong>temperature increases</strong>, <strong>ice caps melt</strong> and <strong>sea levels rise</strong>."],
+ ["impact","What is depletion of natural resources?","Resources such as <strong>fuels</strong> are used <strong>excessively or too quickly</strong>, and they take a <strong>long time to be replaced</strong>."],
+ ["impact","What causes land pollution?","<strong>Littering</strong>, the <strong>use of plastic materials</strong> and <strong>improper disposal of waste</strong>."],
+ ["impact","What causes water pollution, and what is its effect?","<strong>Chemical waste</strong> discharged by factories into water bodies. It <strong>kills organisms</strong> that live in the water."],
+ ["impact","What causes air pollution?","<strong>Smoke and harmful gases</strong> from factories burning fuels, and <strong>vehicles</strong>."],
+ ["impact","How can you help the environment?","<strong>Use less plastics, walk instead of drive, recycle, don't waste food</strong> and <strong>don't litter</strong>."]
+];
+
+/* ---------- Fill the Gaps: text uses [answer]; extra = decoy words ---------- */
+const GAPS = [
+ {t:"energy", title:"Photosynthesis", text:"In photosynthesis, a plant uses [light], [water] and [carbon dioxide] to make [sugar] and [oxygen]. Excess sugar is stored as [starch].", extra:["nitrogen"]},
+ {t:"energy", title:"Energy from the Sun", text:"The plant gets its food [directly] from the Sun. We get our food [indirectly] from the Sun.", extra:[]},
+ {t:"forces", title:"Forces", text:"A force is a push or a pull. We [push] a trolley. We [pull] a rubber band to stretch it. Four types of forces are [gravity], [elastic] force, [frictional] force and [magnetic] force.", extra:["heat"]},
+ {t:"forces", title:"Effects of forces", text:"We cannot see a [force] but we can feel the [effects] of a force. A force can cause a [stationary] object to start moving. It can cause a moving object to [stop], change its [direction], slow down or speed up. It can also change an object's [shape] or size.", extra:[]},
+ {t:"env", title:"Factors of an environment", text:"The factors that affect the survival of living things are food, [air], [temperature], other organisms, [water] and [light]. Remember them as F-A-T-O-W-L.", extra:["soil"]},
+ {t:"env", title:"Populations and communities", text:"A [population] is a group of the same kind of organisms living in the same place. A [community] is made up of different populations living together. Crabs and starfish live in the [seashore] community. Mudskippers and crocodiles live in the [mangrove swamp] community. Bird's nest ferns and moss live in the [tree] community.", extra:["desert"]},
+ {t:"food", title:"Food chains", text:"In the food chain grass → goat → tiger, grass is the [producer] because it makes its own food. The goat and the tiger are [consumers]. The goat is the [prey] and the tiger is the [predator]. The energy in a food chain comes from the [Sun].", extra:["decomposer"]},
+ {t:"adapt", title:"Why animals adapt", text:"Animals adapt so that they can get air, water and [food], cope with cold and [warm] conditions, protect themselves from their [enemies] and [reproduce].", extra:[]},
+ {t:"adapt", title:"Types of adaptation", text:"[Physical] adaptations include body shapes, body colours and body coverings. [Behavioural] adaptations include hiding under rocks, staying in the [shade] and coming out only at [night] to hunt.", extra:[]},
+ {t:"adapt", title:"Extreme temperatures", text:"In cold places, animals have thick [fur] and a layer of [fat]. In hot places, camels [urinate] and sweat very little. Cacti have [needle-like] leaves and thick [fleshy] stems.", extra:["feathers"]},
+ {t:"adapt", title:"Movement and breathing", text:"A shark has a [streamlined] body shape. A penguin has webbed feet and [flippers]. An eagle has [hollow] bones. A goldfish breathes underwater using [gills]. A mosquito larva uses an air [tube].", extra:["lungs"]},
+ {t:"adapt", title:"Protection and catching prey", text:"Hedgehogs have sharp [spines] to protect themselves. Pufferfish make themselves appear [bigger]. Tigers have strong jaws and [claws]. Spiders use [webs] to catch prey and [venom] to kill it.", extra:[]},
+ {t:"impact", title:"Man's impact", text:"Four ways Man harms the environment are [pollution], [deforestation], [global warming] and depletion of natural resources. Global warming causes ice caps to [melt] and sea levels to [rise].", extra:["recycling"]},
+ {t:"impact", title:"Pollution", text:"Land pollution is caused by [littering] and improper disposal of waste. Water pollution is caused by [chemical] waste from factories. Air pollution is caused by [smoke] from factories and by [vehicles]. We can help by using less plastics and [recycling].", extra:["trees"]}
+];
+
+/* ---------- Sprint: [topic, question, correct, [wrong...]] ---------- */
+const TF = ["True","False"];
+const SPRINT = [
+ ["energy","Plants need light, water and ___ for photosynthesis.","carbon dioxide",["oxygen","nitrogen","starch"]],
+ ["energy","Photosynthesis makes sugar and ___.","oxygen",["carbon dioxide","water","nitrogen"]],
+ ["energy","Excess sugar in a plant is stored as ___.","starch",["oxygen","water","fat"]],
+ ["energy","We get our food indirectly from the Sun.","True",["False"]],
+ ["energy","Plants get their food indirectly from the Sun.","False",["True"]],
+ ["forces","A force is a push or a ___.","pull",["spin","heat","light"]],
+ ["forces","Which force pulls objects towards the Earth?","Gravity",["Magnetic force","Elastic force","Frictional force"]],
+ ["forces","Which force acts in a stretched rubber band?","Elastic force",["Gravity","Magnetic force","Frictional force"]],
+ ["forces","Which force acts between surfaces that rub against each other?","Frictional force",["Elastic force","Gravity","Magnetic force"]],
+ ["forces","Which force makes a magnet attract an iron nail?","Magnetic force",["Gravity","Frictional force","Elastic force"]],
+ ["forces","We can see a force.","False",["True"]],
+ ["forces","A force can change the shape of an object.","True",["False"]],
+ ["forces","Kicking a moving ball sideways changes its ___.","direction",["colour","mass","shape only"]],
+ ["forces","A force can make a stationary object start ___.","moving",["growing","glowing","melting"]],
+ ["env","Which is NOT one of the F-A-T-O-W-L factors?","Soil",["Food","Water","Light"]],
+ ["env","A group of the same kind of organisms living in the same place is a ___.","population",["community","habitat","food chain"]],
+ ["env","Different populations living together in one place form a ___.","community",["population","food chain","species"]],
+ ["env","Crabs and starfish live in the ___ community.","seashore",["pond","field","tree"]],
+ ["env","Mudskippers live in the ___ community.","mangrove swamp",["field","garden","tree"]],
+ ["env","Pondskaters and ducks live in the ___ community.","pond",["seashore","field","tree"]],
+ ["env","Grasshoppers, mimosa and snails live in the ___ community.","field",["pond","seashore","mangrove swamp"]],
+ ["env","Bird's nest ferns and moss live in the ___ community.","tree",["pond","seashore","field"]],
+ ["env","Butterflies and bees live in the ___ community.","garden",["seashore","pond","mangrove swamp"]],
+ ["food","In grass → goat → tiger, the producer is the ___.","grass",["goat","tiger","Sun"]],
+ ["food","In grass → goat → tiger, the predator is the ___.","tiger",["goat","grass","Sun"]],
+ ["food","In grass → goat → tiger, the prey is the ___.","goat",["tiger","grass","Sun"]],
+ ["food","A producer makes its own food.","True",["False"]],
+ ["food","A consumer can make its own food.","False",["True"]],
+ ["food","The energy in a food chain first comes from the ___.","Sun",["soil","water","predator"]],
+ ["adapt","Thick fur and a layer of fat help animals survive in ___ places.","cold",["hot","dark","wet"]],
+ ["adapt","Which animal urinates and sweats very little to survive in the desert?","Camel",["Penguin","Polar bear","Shark"]],
+ ["adapt","Thick fleshy stems help a cactus survive in ___ places.","hot, dry",["cold","dark","wet"]],
+ ["adapt","Body colour that helps a stick insect blend in is a ___ adaptation.","physical",["behavioural","chemical","seasonal"]],
+ ["adapt","A desert fox coming out only at night to hunt is a ___ adaptation.","behavioural",["physical","chemical","seasonal"]],
+ ["adapt","A shark's streamlined body helps it in ___.","movement",["reproduction","obtaining sunlight","living in the dark"]],
+ ["adapt","Hollow bones and strong wings help an eagle in ___.","movement",["breathing underwater","reproduction","catching sunlight"]],
+ ["adapt","A goldfish breathes underwater using ___.","gills",["lungs","an air tube","moist skin"]],
+ ["adapt","A mosquito larva breathes using an ___.","air tube",["air bubble","gills","moist skin"]],
+ ["adapt","A water beetle breathes underwater by carrying an ___.","air bubble",["air tube","gill","shell"]],
+ ["adapt","An owl's very good night vision helps it live in ___.","the dark",["water","the desert","the cold"]],
+ ["adapt","A peacock displaying its feathers is an adaptation for ___.","reproduction",["movement","catching prey","breathing"]],
+ ["adapt","A hedgehog's spines help it to ___.","protect itself against predators",["catch prey","reproduce","obtain sunlight"]],
+ ["adapt","A pufferfish makes itself appear bigger to ___.","protect itself from predators",["catch prey","attract a mate","breathe underwater"]],
+ ["adapt","A spider uses webs and venom to ___.","catch prey",["reproduce","move faster","obtain sunlight"]],
+ ["adapt","Plants with weak stems climb onto supports to ___.","obtain sunlight",["catch prey","breathe","reproduce"]],
+ ["impact","Clearing forests for farming or housing is called ___.","deforestation",["pollution","recycling","global warming"]],
+ ["impact","Melting ice caps and rising sea levels are effects of ___.","global warming",["deforestation","recycling","littering"]],
+ ["impact","Harmful substances released into the land, air and water are called ___.","pollutants",["nutrients","producers","resources"]],
+ ["impact","Using fuels too quickly leads to ___.","depletion of natural resources",["global cooling","more forests","cleaner air"]],
+ ["impact","Littering causes ___ pollution.","land",["air","noise","light"]],
+ ["impact","Chemical waste from factories in rivers causes ___ pollution.","water",["land","air","light"]],
+ ["impact","Smoke from factories and vehicles causes ___ pollution.","air",["water","land","noise"]],
+ ["impact","Which action helps the environment?","Recycling",["Littering","Wasting food","Using more plastics"]],
+ ["impact","Walking instead of driving helps the environment.","True",["False"]],
+ ["impact","Natural resources like fuels can be replaced very quickly.","False",["True"]]
+];
+
+/* ---------- pictures from the revision cards ---------- */
+const IMG_DIR="img/";
+const CARD_IMG={
+"What does a plant need for photosynthesis, and what does it make?": {
+"q": [
+"s03.jpg"
+],
+"a": [
+"s04.jpg"
+]
+},
+"What happens to the excess sugar made in photosynthesis?": {
+"a": [
+"s04.jpg"
+]
+},
+"How do plants and people get energy from the Sun?": {
+"q": [
+"plant.jpg"
+]
+},
+"What is a force?": {
+"q": [
+"trolley.jpg"
+]
+},
+"Name the 4 types of forces.": {
+"a": [
+"forces3.jpg"
+]
+},
+"What are the effects of a force?": {
+"q": [
+"skate.jpg",
+"tennis.jpg"
+]
+},
+"Name the 6 factors in an environment that affect the survival of living things.": {
+"q": [
+"factors.jpg"
+]
+},
+"How many populations of animals are in this picture?": {
+"q": [
+"s21.jpg"
+],
+"a": [
+"s22.jpg"
+]
+},
+"Which community do crabs and starfish belong to?": {
+"q": [
+"c-seashore.jpg"
+]
+},
+"Which community do mudskippers, crocodiles and frogs belong to?": {
+"q": [
+"c-mangrove.jpg"
+]
+},
+"Which community do pondskaters, dragonflies and ducks belong to?": {
+"q": [
+"c-pond.jpg"
+]
+},
+"Which community do grasshoppers, mimosa plants and snails belong to?": {
+"q": [
+"c-field.jpg"
+]
+},
+"Which community do butterflies, bees and flowering plants belong to?": {
+"q": [
+"c-garden.jpg"
+]
+},
+"Which community do bird's nest ferns and moss belong to?": {
+"q": [
+"c-tree.jpg"
+]
+},
+"In the food chain grass → goat → tiger, name the producer, consumers, prey and predator.": {
+"q": [
+"foodchain.jpg"
+],
+"a": [
+"s36.jpg"
+]
+},
+"Why do animals adapt?": {
+"q": [
+"adapt-why.jpg"
+]
+},
+"What are the 2 types of adaptation?": {
+"q": [
+"adapt-types.jpg"
+]
+},
+"How are living things adapted to cold places?": {
+"q": [
+"adapt-temp.jpg"
+]
+},
+"How are living things adapted to hot, dry places?": {
+"q": [
+"adapt-temp.jpg"
+]
+},
+"How are sharks, penguins and eagles adapted for movement?": {
+"q": [
+"adapt-move.jpg"
+]
+},
+"How are animals adapted for breathing underwater?": {
+"q": [
+"adapt-breathe.jpg"
+]
+},
+"How are animals adapted to living in the dark?": {
+"q": [
+"adapt-dark.jpg"
+]
+},
+"How are animals adapted for reproduction?": {
+"q": [
+"peacock.jpg"
+]
+},
+"How are animals adapted to protect themselves against predators?": {
+"q": [
+"adapt-protect.jpg"
+]
+},
+"How are animals adapted for catching prey?": {
+"q": [
+"adapt-catch.jpg"
+]
+},
+"How are plants adapted to obtain sunlight?": {
+"q": [
+"adapt-sun.jpg"
+]
+},
+"Name 4 ways Man can harm the environment.": {
+"q": [
+"impact4.jpg"
+],
+"a": [
+"impact4-a.jpg"
+]
+},
+"What causes land pollution?": {
+"q": [
+"pollution3.jpg"
+],
+"a": [
+"pollution3-a.jpg"
+]
+},
+"How can you help the environment?": {
+"q": [
+"help.jpg"
+]
+}
+};
+const GAP_IMG={
+"Photosynthesis": [
+"s03.jpg"
+],
+"Energy from the Sun": [
+"plant.jpg"
+],
+"Forces": [
+"trolley.jpg"
+],
+"Effects of forces": [
+"skate.jpg",
+"tennis.jpg"
+],
+"Factors of an environment": [
+"factors.jpg"
+],
+"Populations and communities": [
+"c-seashore.jpg",
+"c-mangrove.jpg"
+],
+"Food chains": [
+"foodchain.jpg"
+],
+"Why animals adapt": [
+"adapt-why.jpg"
+],
+"Types of adaptation": [
+"adapt-types.jpg"
+],
+"Extreme temperatures": [
+"adapt-temp.jpg"
+],
+"Movement and breathing": [
+"adapt-move.jpg",
+"adapt-breathe.jpg"
+],
+"Protection and catching prey": [
+"adapt-protect.jpg",
+"adapt-catch.jpg"
+],
+"Man's impact": [
+"impact4.jpg"
+],
+"Pollution": [
+"pollution3.jpg"
+]
+};
+const SPRINT_IMG={
+"Crabs and starfish live in the ___ community.": [
+"c-seashore.jpg"
+],
+"Pondskaters and ducks live in the ___ community.": [
+"c-pond.jpg"
+],
+"In grass → goat → tiger, the producer is the ___.": [
+"foodchain.jpg"
+],
+"In grass → goat → tiger, the predator is the ___.": [
+"foodchain.jpg"
+],
+"In grass → goat → tiger, the prey is the ___.": [
+"foodchain.jpg"
+],
+"A goldfish breathes underwater using ___.": [
+"adapt-breathe.jpg"
+],
+"A hedgehog's spines help it to ___.": [
+"adapt-protect.jpg"
+],
+"A peacock displaying its feathers is an adaptation for ___.": [
+"peacock.jpg"
+],
+"Kicking a moving ball sideways changes its ___.": [
+"tennis.jpg"
+]
+};
+function pics(el,list,alt){ el.innerHTML=""; (list||[]).forEach(f=>{ const i=document.createElement("img"); i.src=IMG_DIR+f; i.alt=alt; i.loading="lazy"; el.appendChild(i); }); el.hidden=!(list&&list.length); }
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+let selected = new Set(TOPICS.map(t=>t.id));
+
+/* ---------- topic chips ---------- */
+function renderChips(){
+  const box = $("#chips"); box.innerHTML="";
+  TOPICS.forEach(t=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.setAttribute("aria-pressed", selected.has(t.id));
+    b.innerHTML=`<span class="theme">${t.theme}</span>${t.name}`;
+    b.onclick=()=>{ selected.has(t.id)?selected.delete(t.id):selected.add(t.id); topicsChanged(); };
+    box.appendChild(b);
+  });
+}
+$("#all").onclick=()=>{ selected=new Set(TOPICS.map(t=>t.id)); topicsChanged(); };
+$("#none").onclick=()=>{ selected=new Set(); topicsChanged(); };
+function topicsChanged(){ renderChips(); buildDeck(); buildGaps(); if(sp.running) endSprint(); showSprintStart(); }
+
+/* ---------- mode tabs ---------- */
+const MODES=["cards","gaps","sprint"];
+function setMode(m){
+  if(!MODES.includes(m)) m="cards";
+  MODES.forEach(x=>{
+    $("#tab-"+x).setAttribute("aria-selected", x===m);
+    $("#mode-"+x).hidden = x!==m;
+  });
+  if(m!=="sprint" && sp.running) endSprint();
+  if(location.hash!=="#"+m){ try{ history.replaceState(null,"","#"+m); }catch(e){} }
+  current=m;
+}
+let current="cards";
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>setMode(t.dataset.mode));
+window.addEventListener("hashchange",()=>setMode(location.hash.slice(1)));
+
+/* ---------- flashcards ---------- */
+let deck=[], fi=0, know=0, learning=[], flipped=false, reviewMode=false;
+function buildDeck(list){
+  reviewMode = !!list;
+  deck = list || CARDS.filter(c=>selected.has(c[0]));
+  fi=0; know=0; learning=[]; showCard();
+}
+function showCard(){
+  $("#fc-know").textContent=know; $("#fc-learn").textContent=learning.length;
+  $("#fc-review").hidden = learning.length===0;
+  flipped=false; $("#fc-a").hidden=true; $("#fc-hint").hidden=false; pics($("#fc-qpics"),[],""); pics($("#fc-apics"),[],"");
+  if(!deck.length){
+    $("#fc-topic").textContent=""; $("#fc-q").textContent="Choose at least one topic above to see flashcards."; $("#fc-count").textContent="";
+    ["#fc-yes","#fc-no","#fc-prev"].forEach(s=>$(s).disabled=true); $("#fc-hint").hidden=true; return;
+  }
+  if(fi>=deck.length){
+    $("#fc-topic").textContent="Deck finished";
+    $("#fc-q").textContent=`You knew ${know} of ${deck.length} cards.` + (learning.length? " Review your “still learning” cards next." : " Great work! Try the 60s Sprint.");
+    $("#fc-count").textContent=`${deck.length} / ${deck.length}`; $("#fc-hint").hidden=true;
+    ["#fc-yes","#fc-no"].forEach(s=>$(s).disabled=true); $("#fc-prev").disabled=false; return;
+  }
+  const c=deck[fi];
+  ["#fc-yes","#fc-no"].forEach(s=>$(s).disabled=false); $("#fc-prev").disabled = fi===0;
+  $("#fc-topic").textContent=TNAME[c[0]] + (reviewMode?" · review":"");
+  $("#fc-q").textContent=c[1]; $("#fc-a").innerHTML=c[2];
+  const im=CARD_IMG[c[1]]||{}; pics($("#fc-qpics"),im.q,"Picture for this question"); pics($("#fc-apics"),im.a,"Picture from the revision card"); $("#fc-apics").hidden=true;
+  $("#fc-count").textContent=`Card ${fi+1} of ${deck.length}`;
+}
+function flip(){ if(!deck.length||fi>=deck.length) return; flipped=!flipped; $("#fc-a").hidden=!flipped; $("#fc-hint").hidden=flipped; $("#fc-apics").hidden = !flipped || !$("#fc-apics").children.length; }
+$("#fc-card").onclick=flip;
+$("#fc-yes").onclick=()=>{ if(fi<deck.length){ know++; fi++; showCard(); } };
+$("#fc-no").onclick=()=>{ if(fi<deck.length){ learning.push(deck[fi]); fi++; showCard(); } };
+$("#fc-prev").onclick=()=>{ if(fi>0){ fi--; showCard(); } };
+$("#fc-shuffle").onclick=()=>{ deck=shuffle(deck); fi=0; know=0; learning=[]; showCard(); };
+$("#fc-review").onclick=()=>buildDeck(learning.slice());
+$("#fc-reset").onclick=()=>buildDeck();
+
+/* ---------- fill the gaps ---------- */
+let gaps=[], gi=0, gState=null;
+function buildGaps(){ gaps=GAPS.filter(g=>selected.has(g.t)); gi=0; renderGap(); }
+function renderGap(){
+  $("#g-result").textContent=""; $("#g-result").className="result";
+  const has=gaps.length>0;
+  ["#g-check","#g-show","#g-clear","#g-prev","#g-next"].forEach(s=>$(s).disabled=!has);
+  if(!has){ pics($("#g-pics"),[],""); $("#g-title").textContent="Choose at least one topic above."; $("#g-text").innerHTML=""; $("#g-bank").innerHTML=""; $("#g-topic").textContent=""; $("#g-count").textContent=""; return; }
+  const g=gaps[gi];
+  $("#g-topic").textContent=TNAME[g.t]; $("#g-title").textContent=g.title; pics($("#g-pics"),GAP_IMG[g.title],"Picture from the revision card");
+  $("#g-count").textContent=`Passage ${gi+1} of ${gaps.length}`;
+  $("#g-prev").disabled=gi===0; $("#g-next").disabled=gi===gaps.length-1;
+  const answers=[]; const parts=g.text.split(/\[([^\]]+)\]/);
+  const p=$("#g-text"); p.innerHTML="";
+  parts.forEach((s,i)=>{
+    if(i%2===0){ p.appendChild(document.createTextNode(s)); }
+    else{
+      const idx=answers.length; answers.push(s);
+      const b=document.createElement("button"); b.className="blank"; b.dataset.i=idx; b.innerHTML="&nbsp;";
+      b.setAttribute("aria-label","Blank "+(idx+1));
+      b.onclick=()=>blankClick(idx); p.appendChild(b);
+    }
+  });
+  const bankWords = shuffle([...new Set(answers.map(a=>a.toLowerCase()))].concat(g.extra));
+  gState={answers, fills:Array(answers.length).fill(null), active:0, bank:bankWords};
+  const bank=$("#g-bank"); bank.innerHTML="";
+  bankWords.forEach(w=>{ const b=document.createElement("button"); b.className="word"; b.textContent=w; b.onclick=()=>wordClick(w); bank.appendChild(b); });
+  paintGap();
+}
+function paintGap(){
+  document.querySelectorAll("#g-text .blank").forEach(b=>{
+    const i=+b.dataset.i; const v=gState.fills[i];
+    b.className="blank"+(i===gState.active?" active":"");
+    b.innerHTML = v? v : "&nbsp;";
+  });
+  // a word is "used up" when it fills as many blanks as it is needed (words like "poles" appear twice)
+  document.querySelectorAll("#g-bank .word").forEach(b=>{
+    const w=b.textContent; const need=gState.answers.filter(a=>a.toLowerCase()===w).length || 1;
+    const used=gState.fills.filter(f=>f===w).length;
+    b.classList.toggle("used", used>=need);
+  });
+}
+function blankClick(i){
+  if(gState.fills[i]!==null){ gState.fills[i]=null; }
+  gState.active=i; $("#g-result").textContent=""; paintGap();
+}
+function wordClick(w){
+  let i=gState.active;
+  if(i===null || gState.fills[i]!==null){ i=gState.fills.indexOf(null); }
+  if(i===-1) return;
+  gState.fills[i]=w;
+  const next=gState.fills.indexOf(null); gState.active = next===-1? null : next;
+  $("#g-result").textContent=""; paintGap();
+}
+$("#g-check").onclick=()=>{
+  let right=0;
+  document.querySelectorAll("#g-text .blank").forEach(b=>{
+    const i=+b.dataset.i; const ok=(gState.fills[i]||"")===gState.answers[i].toLowerCase();
+    if(ok) right++; b.classList.remove("active"); b.classList.add(ok?"right":"wrong");
+  });
+  const n=gState.answers.length, r=$("#g-result");
+  r.textContent = right===n ? `All ${n} correct! Well done.` : `${right} of ${n} correct. Tap a red blank to try it again.`;
+  r.className="result "+(right===n?"good":"bad");
+};
+$("#g-show").onclick=()=>{ gState.fills=gState.answers.map(a=>a.toLowerCase()); gState.active=null; paintGap(); $("#g-check").onclick(); $("#g-result").textContent="Answers shown. Read the passage aloud, then press Clear and try it from memory."; $("#g-result").className="result"; };
+$("#g-clear").onclick=()=>{ gState.fills.fill(null); gState.active=0; $("#g-result").textContent=""; paintGap(); };
+$("#g-prev").onclick=()=>{ if(gi>0){gi--; renderGap();} };
+$("#g-next").onclick=()=>{ if(gi<gaps.length-1){gi++; renderGap();} };
+
+/* ---------- sprint ---------- */
+const sp={running:false, time:60, score:0, streak:0, right:0, total:0, misses:[], pool:[], q:null, timer:null, locked:false};
+function bestKey(){ return "p6sprint-best-"+[...selected].sort().join(","); }
+function showSprintStart(){
+  $("#sp-start").hidden=false; $("#sp-play").hidden=true; $("#sp-end").hidden=true;
+  const n=SPRINT.filter(q=>selected.has(q[0])).length;
+  $("#sp-go").disabled = n===0;
+  const best=store.get(bestKey());
+  $("#sp-best").textContent = n===0 ? "Choose at least one topic above." : (best? `Best score for these topics: ${best}` : `${n} questions in these topics`);
+}
+function nextQ(){
+  if(!sp.pool.length) sp.pool=shuffle(SPRINT.filter(q=>selected.has(q[0])));
+  const q=sp.pool.pop(); sp.q=q; sp.locked=false;
+  $("#sp-topic").textContent=TNAME[q[0]]; $("#sp-q").textContent=q[1]; pics($("#sp-pics"),SPRINT_IMG[q[1]],"Picture for this question");
+  const opts = q[2]==="True"||q[2]==="False" ? TF.slice() : shuffle([q[2],...q[3]]);
+  const box=$("#sp-opts"); box.innerHTML="";
+  opts.forEach((o,i)=>{ const b=document.createElement("button"); b.className="opt"; b.innerHTML=`<kbd>${i+1}</kbd><span></span>`; b.lastChild.textContent=o; b.onclick=()=>answer(o,b); box.appendChild(b); });
+}
+function answer(o,btn){
+  if(!sp.running||sp.locked) return; sp.locked=true; sp.total++;
+  const ok=o===sp.q[2];
+  if(ok){ sp.right++; sp.streak++; sp.score+=1 + (sp.streak%5===0?1:0); btn.classList.add("right"); }
+  else{
+    sp.streak=0; btn.classList.add("wrong");
+    document.querySelectorAll("#sp-opts .opt").forEach(b=>{ if(b.lastChild.textContent===sp.q[2]) b.classList.add("right"); });
+    if(!sp.misses.some(m=>m[1]===sp.q[1])) sp.misses.push(sp.q);
+  }
+  $("#sp-score").textContent=sp.score; $("#sp-streak").textContent=sp.streak;
+  setTimeout(()=>{ if(sp.running) nextQ(); }, ok?350:1100);
+}
+function startSprint(){
+  Object.assign(sp,{running:true,time:60,score:0,streak:0,right:0,total:0,misses:[],pool:[]});
+  $("#sp-start").hidden=true; $("#sp-end").hidden=true; $("#sp-play").hidden=false;
+  $("#sp-time").textContent=60; $("#sp-score").textContent=0; $("#sp-streak").textContent=0;
+  $("#sp-fill").style.width="100%"; $("#sp-bar").classList.remove("low");
+  nextQ();
+  sp.timer=setInterval(()=>{
+    sp.time--; $("#sp-time").textContent=sp.time;
+    $("#sp-fill").style.width=(sp.time/60*100)+"%";
+    if(sp.time<=10) $("#sp-bar").classList.add("low");
+    if(sp.time<=0) endSprint(true);
+  },1000);
+}
+function endSprint(show){
+  clearInterval(sp.timer); sp.running=false;
+  if(!show) return;
+  $("#sp-play").hidden=true; $("#sp-end").hidden=false;
+  $("#sp-final").textContent=sp.score;
+  const acc = sp.total? Math.round(sp.right/sp.total*100) : 0;
+  const prev=+(store.get(bestKey())||0); let msg="";
+  if(sp.score>prev){ store.set(bestKey(), sp.score); msg = prev? " New personal best!" : ""; }
+  $("#sp-summary").textContent=`${sp.right} correct out of ${sp.total} answered (${acc}% accuracy).${msg}`;
+  const ol=$("#sp-misses"); ol.innerHTML="";
+  $("#sp-miss-wrap").hidden = sp.misses.length===0;
+  sp.misses.forEach(m=>{ const li=document.createElement("li"); li.textContent=m[1]+" → "; const s=document.createElement("span"); s.textContent=m[2]; li.appendChild(s); ol.appendChild(li); });
+}
+$("#sp-go").onclick=startSprint; $("#sp-again").onclick=startSprint;
+
+/* ---------- keyboard ---------- */
+document.addEventListener("keydown",e=>{
+  if(current==="sprint" && sp.running && /^[1-4]$/.test(e.key)){
+    const b=document.querySelectorAll("#sp-opts .opt")[+e.key-1]; if(b){ b.click(); e.preventDefault(); }
+  }
+  if(current==="cards" && e.key===" " && document.activeElement && document.activeElement.id!=="fc-card" && document.activeElement.tagName!=="BUTTON"){ flip(); e.preventDefault(); }
+});
+
+/* ---------- init ---------- */
+renderChips(); buildDeck(); buildGaps(); showSprintStart();
+setMode(location.hash.slice(1) || "cards");
+</script>
+</body>
+</html>
